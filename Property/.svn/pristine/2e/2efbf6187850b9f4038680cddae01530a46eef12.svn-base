@@ -1,0 +1,48 @@
+package managingProperties;
+
+public class Building {
+	
+	private class Apartment {
+		private int n;
+		private Owner proprietario;
+//		public Apartment(String a) {
+//			String[] split = a.split(":");
+//			if(split[0]!=null && split[1]!=null) {
+//				try {
+//				this.numero=Integer.parseInt(split[1]);
+//				}
+//				catch(NumberFormatException n) {
+//					return;
+//				}
+//				this.edificio=split[0];
+//			}
+//		}
+	}
+
+	private String nome;
+	private int totapp;
+	Apartment[] app;
+
+	public Building(String building, int n) {
+		this.nome=building;
+		this.totapp=n;
+		app = new Apartment[n];
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public int getTotapp() {
+		return totapp;
+	}
+
+	public void setOwner(Owner o, int n) {
+		this.app[n].proprietario=o;
+	}
+
+	public Apartment getApp(int n) {
+		return app[n-1];
+	}
+
+}

@@ -1,0 +1,128 @@
+package diet;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Represents an order in the take-away system
+ */
+public class Order {
+	
+	private User u;
+	private Restaurant r;
+	private Timestamp time;
+	
+	private List<NutritionalElement> menues = new ArrayList<>();
+	private List<Integer> quantities = new ArrayList<>();
+	private int tot;
+	
+	
+	public Order(User u, Restaurant r, Timestamp time) {
+		this.u=u;
+		this.r=r;
+		this.time=time;
+	}
+	
+	/**
+	 * Defines the possible order status
+	 */
+	public enum OrderStatus {
+		ORDERED, READY, DELIVERED;
+	}
+	/**
+	 * Defines the possible valid payment methods
+	 */
+	public enum PaymentMethod {
+		PAID, CASH, CARD;
+	}
+	
+	private OrderStatus status = OrderStatus.ORDERED;
+	private PaymentMethod payment = PaymentMethod.CASH;
+		
+	/**
+	 * Total order price
+	 * @return order price
+	 */
+	public double Price() {
+		return -1.0;
+	}
+	
+	/**
+	 * define payment method
+	 * 
+	 * @param method payment method
+	 */
+	public void setPaymentMethod(PaymentMethod method) {
+		payment = method;
+	}
+	
+	/**
+	 * get payment method
+	 * 
+	 * @return payment method
+	 */
+	public PaymentMethod getPaymentMethod() {
+		return payment;
+	}
+	
+	/**
+	 * change order status
+	 * @param newStatus order status
+	 */
+	public void setStatus(OrderStatus newStatus) {
+		status = newStatus;
+	}
+	
+	/**
+	 * get current order status
+	 * @return order status
+	 */
+	public OrderStatus getStatus(){
+		return status;
+	}
+	
+	/**
+	 * Add a new menu with the relative order to the order.
+	 * The menu must be defined in the {@link Food} object
+	 * associated the restaurant that created the order.
+	 * 
+	 * @param menu     name of the menu
+	 * @param quantity quantity of the menu
+	 * @return this order to enable method chaining
+	 */
+	public Order addMenus(String menu, int quantity) {
+		Menu m = r.getMenu(menu);
+		if(menues.contains(m)) {
+			int index = menues.indexOf(m);
+			quantities.set(index, quantity);
+		}
+		else {
+			menues.add(m);
+			quantities.add(quantity);
+			tot++;
+		}
+		return this;
+	}
+	
+	/**
+	 * Converts to a string as:
+	 * <pre>
+	 * RESTAURANT_NAME, USER_FIRST_NAME USER_LAST_NAME : DELIVERY(HH:MM):
+	 * 	MENU_NAME_1->MENU_QUANTITY_1
+	 * 	...
+	 * 	MENU_NAME_k->MENU_QUANTITY_k
+	 * </pre>
+	 */
+	@Override
+	public String toString() {
+		StringBuffer s = new StringBuffer();
+		s.append(r.getName()+" "+u.getFirstName()+" "+u.getLastName()+
+				" : ("+time.toString()+"):\n");
+		for(int i = 0; i<tot; i++) {
+			s.append("\t"+menues.get(i)+"->"+quantities.get(i)+"\n");
+		}
+		return s.toString();
+	}
+	
+}

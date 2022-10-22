@@ -1,0 +1,154 @@
+package university;
+
+/**
+ * This class represents a university education system.
+ * 
+ * It manages students and courses.
+ *
+ */
+public class University {
+	private String uName; //@param name name of the university
+	private String rName; //@param first
+	private String rSurname; //@param last
+
+	private Students[] studenti;		//Dichiaro il vettore
+	static final int TOT = 10000;
+	private int n = TOT;
+	static final int MAX = 1000;
+
+	public Courses[] insegnamenti;
+	static final int START = 10;
+	static final int ADD = 50;
+	private int cod = START;
+	
+	public University(String name){ //Constructor
+		uName = name;
+		studenti = new Students[MAX]; 	//Inizializzo il vettore
+		insegnamenti = new Courses[ADD];
+	}
+	
+	public String getName(){ //Getter for the name of the university
+		
+		if(uName != null) {
+			return uName;
+		}
+		System.err.println("Errore nel nome dell'università.");
+		return null;
+	}
+			 
+	public void setRector(String first, String last){ //Defines the rector for the university
+		
+		if(first != null)
+			rName = first;
+		else {
+			System.err.println("Errore nel nome inserito.");
+			return;
+		}
+		if(last != null)
+			rSurname = last;
+		else {
+			System.err.println("Errore nel cognome inserito.");
+			return;
+		}
+		
+		System.out.println("Informazioni sul rettore inserite correttamente.");
+	}
+	
+	public String getRector(){ //Retrieves the rector of the university
+		
+		if(rName != null && rSurname != null)
+			return rName + " " + rSurname;
+		return null;
+	}
+	
+	public int enroll(String first, String last){ //Enroll a student in the university
+		
+		if(first != null && last != null) {
+			if(n >= TOT + MAX) {
+				System.err.println("Hai raggiunto il numero massimo (1000) di studenti e non puoi più inserirne uno.");
+				return -1;
+			}
+			studenti[n - TOT] = new Students(first, last, n);
+			//System.out.println("Studente inserito correttamente.");
+			return n++;
+		}
+		System.err.println("Errore inserimento studente.");
+		return -1;
+	}
+	
+	public String student(int id){ //Retrieves the information for a given student
+		
+		int i = id - TOT;
+		if(i >= 0 && i < MAX) {
+			return String.valueOf(id) + " " + studenti[i].getsName() + " " + studenti[i].getsSurname();
+		}
+		else {
+			System.err.println("Errore id inserito.");
+			return null;
+		}
+	}
+	
+	public int activate(String title, String teacher){ //Activates a new course with the given teacher
+		
+		if(title != null && teacher != null) {
+			if(cod >= START + ADD) {
+				System.err.println("Hai raggiunto il numero massimo di insegnamenti (50) e non puoi più inserirne uno.");
+				return -1;
+			}
+			insegnamenti[cod - START] = new Courses(title, teacher, cod);
+			//System.out.println("Insegnamento inserito correttamente.");
+			return cod++;
+		}
+		System.err.println("Errore inserimento insegnamento.");
+		return -1;
+	}
+	
+	/**
+	 * Retrieve the information for a given course
+	 * 
+	 * @param code unique code of the course
+	 * @return information about the course
+	 */
+	public String course(int code){
+		
+		int i = code - ADD;
+		if(i >= 0 && i < START+ADD) {
+			return String.valueOf(code) + ", " + insegnamenti[i].getNome() + ", " + insegnamenti[i].getTeacher();
+		}
+		else {
+			System.err.println("Errore codice corso inserito.");
+			return null;
+		}
+	}
+	
+	/**
+	 * Register a student to attend a course
+	 * @param studentID id of the student
+	 * @param courseCode id of the course
+	 */
+	public void register(int studentID, int courseCode){
+		//TODO: to be implemented
+	}
+	
+	/**
+	 * Retrieve a list of attendees
+	 * 
+	 * @param courseCode unique id of the course
+	 * @return list of attendees separated by "\n"
+	 */
+	public String listAttendees(int courseCode){
+		//TODO: to be implemented
+		return null;
+	}
+
+	/**
+	 * Retrieves the study plan for a student
+	 * 
+	 * @param studentID id of the student
+	 * @return list of courses the student is registered for
+	 */
+	public String studyPlan(int studentID){
+		//TODO: to be implemented
+		return null;
+	}
+}

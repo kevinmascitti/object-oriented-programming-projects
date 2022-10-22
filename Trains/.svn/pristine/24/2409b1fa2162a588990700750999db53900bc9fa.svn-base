@@ -1,0 +1,55 @@
+package orari;
+
+public class Treno implements Comparable<Treno>{
+	private Percorso percorso;
+	private int giorno;
+	private int mese;
+	private int anno;
+
+  public Treno(Percorso percorso, int giorno, int mese, int anno) {
+	this.percorso=percorso;
+	this.giorno=giorno;
+	this.mese=mese;
+	this.anno=anno;
+  }
+
+  public Percorso getPercorso() {
+	return percorso;
+  }
+
+  public int getGiorno() {
+    return giorno;
+  }
+
+  public int getMese() {
+    return mese;
+  }
+
+  public int getAnno() {
+    return anno;
+  }
+
+  public Passaggio registraPassaggio(String codice, int ore, int minuti) 
+  	throws StazioneNonValida {
+    return null;
+  }
+
+  public boolean arrivato() {
+    return false;
+  }
+
+  public int ritardoMassimo() {
+    return -1;
+  }
+
+  public int ritardoFinale() {
+    return -1;
+  }
+  
+  @Override
+  public int compareTo(Treno altro) {
+	  return (altro.anno*10000+altro.mese*100+altro.giorno)-(anno*10000+mese*100+giorno);
+  }
+  
+
+}

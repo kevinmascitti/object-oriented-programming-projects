@@ -1,0 +1,48 @@
+package university;
+
+public class Students {
+
+	private String sName;
+	private String sSurname;
+	private int n;
+	private Courses[] corsi;
+	private int i = 0;
+	
+	public Students(String sName, String sSurname, int n) {
+		this.sName = sName;
+		this.sSurname = sSurname;
+		this.n = n;
+		corsi = new Courses[25];
+	}
+	
+	public void putS(Courses corso) {
+		corsi[i++] = corso;
+	}
+	
+	public String getsName() {
+		return sName;
+	}
+	public void setsName(String sName) {
+		this.sName = sName;
+	}
+	public String getsSurname() {
+		return sSurname;
+	}
+	public void setsSurname(String sSurname) {
+		this.sSurname = sSurname;
+	}
+	public int getN() {
+		return n;
+	}
+	public void setN(int n) {
+		this.n = n;
+	}
+	public Courses[] getCourses() {
+		return corsi;
+	}
+	public String toString() {
+		return n+" "+sName+" "+sSurname+"\n";
+	}
+
+		
+}

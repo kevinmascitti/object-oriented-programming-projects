@@ -1,0 +1,22 @@
+package orari;
+
+
+public class Passaggio {
+
+  public String getStazione() {
+    return null;
+  }
+
+  public int getOra() {
+    return -1;
+  }
+
+  public int getMinuti() {
+    return -1;
+  }
+
+  public int ritardo() {
+    return -1;
+  }
+
+}

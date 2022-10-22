@@ -1,0 +1,86 @@
+package libreria;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
+public class Libreria {
+	
+	private Map<String, Editore> editori = new TreeMap<>();
+	private List<Libro> libri = new ArrayList<>();
+
+    public Editore creaEditore(String nome, int tempoConsegna, String email){
+    	Editore e = new Editore(nome, tempoConsegna, email);
+    	editori.put(nome, e);
+        return e;
+    }
+
+    public Editore getEditore(String nome){
+        return editori.get(nome);
+    }
+
+    public Collection getEditori(){
+        return editori.values();
+    }
+
+    public Libro creaLibro(String titolo, String autore, int anno, double prezzo, String nomeEditore)
+    			throws EditoreInesistente {
+    	Editore e = editori.get(nomeEditore);
+    	if(e.equals(null)) {
+    		throw new EditoreInesistente();
+    	}
+    	Libro l = new Libro(titolo, autore, anno, prezzo, e);
+    	libri.add(l);
+    	return l;
+    }
+    
+    public Libro getLibro(String autore, String titolo){
+    	Libro l;
+        if(autore.isEmpty() && titolo.isEmpty()) {
+        	System.out.println("Errore: libro non trovato");
+        	return null;
+        }
+        if(autore.isEmpty()) {
+        	 Optional<Libro> libro = libri.stream()
+        		.filter(p->p.getTitolo().equals(titolo))
+        		.findAny();
+        	 if(libro.isPresent())
+        		 return libro.get();
+        	 else {
+        		 return null;
+        	 }
+        }
+        if(titolo.isEmpty()) {
+        	Optional<Libro> libro = libri.stream()
+        		.filter(p->p.getTitolo().equals(autore))
+        		.findAny();
+        	 if(libro.isPresent())
+        		 return libro.get();
+        	 else {
+        		 return null;
+        	 }
+        }
+        return null;
+    }
+    
+    public Collection getClassificaSettimana(final int settimana){
+        return null;
+    }
+    
+    public Collection getClassificaMese(final int mese){
+        return null;
+    }
+    
+    public Collection getOrdini(){
+        return null;
+    }
+    
+    public void ordineRicevuto(int numOrdine){
+    }
+    
+    public void leggi(String file){
+    }
+}

@@ -1,0 +1,25 @@
+package hydraulic;
+
+/**
+ * Represents the sink, i.e. the terminal element of a system
+ *
+ */
+public class Sink extends Element {
+
+	/**
+	 * Constructor
+	 * @param name
+	 */
+	
+	public Sink(String name) {
+		super(name);
+	}
+	
+	@Override
+	protected StringBuffer layout(String pad) {
+		StringBuffer res = new StringBuffer();
+		res.append("[").append(getName()).append("]Sink *");
+		return res;
+	}
+	
+}

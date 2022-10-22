@@ -1,0 +1,64 @@
+package orari;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+
+public class Percorso {
+	
+	private String codice;
+	private String categoria;
+	private boolean straordinario;
+	private List<Fermata> fermate = new ArrayList<>();
+
+	public Percorso(String codice, String categoria) {
+		this.codice=codice;
+		this.categoria=categoria;
+		this.straordinario=false;
+	}
+
+	public String getCodice() {
+		return codice;
+	}
+
+	public String getCategoria() {
+		return categoria;
+	}
+
+	public boolean isStraordinario() {
+		return straordinario;
+	}
+
+	public void setStraordinario(boolean newValue) {
+		this.straordinario=newValue;
+	}
+
+	public Fermata aggiungiFermata(String nomeStazione, int ore, int minuti) {
+		Fermata f = new Fermata(nomeStazione, ore, minuti);
+		return f;
+	}
+
+	public List<Treno> getTreni() {
+		return null;
+	}
+
+	public List<Fermata> getFermate() {
+		Collections.sort(fermate, Comparator.comparingInt(Fermata::getOre).thenComparingInt(Fermata::getMinuti));
+		return Collections.unmodifiableList(fermate);
+	}
+
+	public int ritardoMassimo() {
+		return -1;
+	}
+
+	public int ritardoMedio() {
+		return -1;
+	}
+
+	public void addTreno(Treno t) {
+	}
+
+}
+

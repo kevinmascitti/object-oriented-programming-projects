@@ -1,0 +1,78 @@
+package hydraulic;
+
+import java.util.Arrays;
+
+/**
+ * Represents the generic abstract element of an hydraulics system.
+ * It is the base class for all elements.
+ *
+ * Any element can be connect to a downstream element
+ * using the method {@link #connect(Element) connect()}.
+ */
+public abstract class Element {
+	
+	/**
+	 * Constructor
+	 * @param name the name of the element
+	 */
+	private String name;
+	protected int numOutput = 0;
+	protected Element[] outputs;
+	
+	public Element(String name){
+		this.name = name;
+		this.numOutput = 1;
+		outputs = new Element[1];
+	}
+	
+	public Element(String name, int numOutputs){
+		this.name = name;
+		this.numOutput = numOutputs;
+		outputs = new Element[numOutputs];
+	}
+
+	/**
+	 * getter method
+	 * @return the name of the element
+	 */
+	public String getName(){
+		return this.name;
+	}
+	
+	/**
+	 * Connects this element to a given element.
+	 * The given element will be connected downstream of this element
+	 * @param elem the element that will be placed downstream
+	 */
+	
+	public void connect(Element elem){
+		if(this instanceof Sink) {
+			System.err.println("Errore: un elemento Sink non ha un'uscita!");
+			this.outputs[0]=null;
+			return;
+		}
+		this.outputs[0] = elem;
+	}
+	
+	/**
+	 * Retrieves the element connected downstream of this
+	 * @return downstream element
+	 */
+	public Element getOutput(){
+		return this.outputs[0];
+	}
+
+	protected abstract StringBuffer layout(String padding);
+	
+	/**
+	 * Returns a string consisting of 'n' blanks
+	 * 
+	 * @param n number of blanks to generate
+	 * @return
+	 */
+	protected static String blanks(int n) {
+		char[] res = new char[n];
+		Arrays.fill(res, ' ');
+		return new String(res);
+	}
+}

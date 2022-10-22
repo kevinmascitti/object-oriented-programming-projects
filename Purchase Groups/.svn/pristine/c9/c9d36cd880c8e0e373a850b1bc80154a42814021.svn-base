@@ -1,0 +1,36 @@
+package groups;
+
+public class Bid {
+
+	private Gruppo gruppo;
+	private Supplier supplier;
+	private int price;
+	private int voti = 0;
+
+	public Bid(Gruppo gruppo, Supplier supplier, int price) {
+		this.gruppo=gruppo;
+		this.supplier=supplier;
+		this.price=price;
+	}
+
+	public Gruppo getGruppo() {
+		return gruppo;
+	}
+
+	public Supplier getSupplier() {
+		return supplier;
+	}
+
+	public int getPrice() {
+		return price;
+	}
+	
+	public void increaseVotes() {
+		voti++;
+	}
+	
+	public int getVotes() {
+		return voti;
+	}
+
+}

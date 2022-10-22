@@ -1,0 +1,137 @@
+package it.polito.oop.books;
+
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+public class Book {
+
+    private Map<String, Topic> argomenti = new TreeMap<>();
+	private List<Question> domande = new LinkedList<>();
+	private List<TheoryChapter> teoria = new LinkedList<>();
+	private List<ExerciseChapter> esercizi = new LinkedList<>();
+	private Map<String, Assignment> compiti = new TreeMap<>();
+
+	/**
+	 * Creates a new topic, if it does not exist yet, or returns a reference to the
+	 * corresponding topic.
+	 * 
+	 * @param keyword the unique keyword of the topic
+	 * @return the {@link Topic} associated to the keyword
+	 * @throws BookException
+	 */
+	public Topic getTopic(String keyword) throws BookException {
+	    if(keyword.length()>0 && keyword!=null) {
+	    	if(!argomenti .containsKey(keyword)) {
+	    		Topic t = new Topic(keyword);
+	    		argomenti.put(keyword, t);
+	    		return t;
+	    	}
+	    	else {
+	    		return argomenti.get(keyword);
+	    	}
+	    }
+	    else
+	    	throw new BookException();
+	}
+
+	public Question createQuestion(String question, Topic mainTopic) {
+        if(question.length()>0 && mainTopic!=null) {
+        	Question q = new Question(question, mainTopic);
+			domande.add(q);
+			return q;
+        }
+        return null;
+	}
+
+	public TheoryChapter createTheoryChapter(String title, int numPages, String text) {
+        if(title.length()>0 && numPages>0 && text.length()>0) {
+			TheoryChapter tc = new TheoryChapter(title, numPages, text);
+	        teoria .add(tc);
+	        return tc;
+        }
+        return null;
+	}
+
+	public ExerciseChapter createExerciseChapter(String title, int numPages) {
+		if(title.length()>0 && numPages>0) {
+				ExerciseChapter ec = new ExerciseChapter(title, numPages);
+		        esercizi .add(ec);
+		        return ec;
+	        }
+	        return null;
+	}
+
+	public List<Topic> getAllTopics() {
+        List<Topic> lista = new LinkedList<>();
+        for(TheoryChapter c : teoria) {
+        	for(Topic t : c.argomenti.values()) {
+        		if(!lista.contains(t))
+        			lista.add(t);
+        	}
+        }
+        for(ExerciseChapter c : esercizi) {
+        	for(Question q : c.domande) {
+        		if(!lista.contains(q.mainTopic))
+        			lista.add(q.mainTopic);
+        	}
+        }
+        if(lista.size()>0)
+	        return lista.stream()
+	        		.sorted(Comparator.comparing(Topic::getKeyword))
+	        		.collect(Collectors.toList());
+        return null;
+	}
+
+	public boolean checkTopics() {
+        int found;
+		for(ExerciseChapter c : esercizi) {
+        	for(Question q : c.domande) {
+        		found=0;
+        		for(TheoryChapter t : teoria) {
+					for(Topic topic : t.argomenti.values()) {
+                		if(topic.equals(q.mainTopic)) {
+                			found=1;
+                			break;
+                		}
+                	}
+                	if(found==1)
+                		break;
+                }
+        		if(found==0)
+        			return false;
+        	}
+        }
+		return true;
+	}
+
+	public Assignment newAssignment(String ID, ExerciseChapter chapter) {
+        if(ID.length()>0 && chapter!=null) {
+			Assignment a = new Assignment(ID, chapter);
+	        compiti.put(ID, a);
+	        return a;
+	    }
+        return null;
+	}
+	
+    /**
+     * builds a map having as key the number of answers and 
+     * as values the list of questions having that number of answers.
+     * @return
+     */
+    public Map<Long,List<Question>> questionOptions(){
+        Map<Long, List<Question>> mappa = new TreeMap<>();
+        for(Question q : domande) {
+        	if(!mappa.containsKey(q.numAnswers()))
+        		mappa.put(q.numAnswers(), new LinkedList<>());
+        	mappa.get(q.numAnswers()).add(q);
+        }
+    	if(mappa.size()>0)
+    		return mappa;
+    	return null;
+    }
+    
+}

@@ -1,0 +1,24 @@
+package groups;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Cliente {
+
+	private String name;
+	private Map<String,Gruppo> gruppi = new TreeMap<>();
+
+	public Cliente(String s) {
+		this.name=s;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void addGruppo(Gruppo g) {
+		if(g!=null)
+			gruppi .put(g.getName(), g);
+	}
+
+}

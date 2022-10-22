@@ -1,0 +1,34 @@
+package university;
+
+public class Students {
+
+	private String sName;
+	private String sSurname;
+	private int n;
+	
+	public Students(String sName, String sSurname, int n) {
+		this.sName = sName;
+		this.sSurname = sSurname;
+		this.n = n;
+	}
+	
+	public String getsName() {
+		return sName;
+	}
+	public void setsName(String sName) {
+		this.sName = sName;
+	}
+	public String getsSurname() {
+		return sSurname;
+	}
+	public void setsSurname(String sSurname) {
+		this.sSurname = sSurname;
+	}
+	public int getN() {
+		return n;
+	}
+	public void setN(int n) {
+		this.n = n;
+	}
+		
+}

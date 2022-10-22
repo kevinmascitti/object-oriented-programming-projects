@@ -1,0 +1,13 @@
+package managingProperties;
+
+public class Owner {
+
+	private String nome;
+	private String[] appartemnti;
+
+	public Owner(String owner, String[] apartments) {
+		this.nome=owner;
+		this.appartemnti=apartments;
+	}
+
+}

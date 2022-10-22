@@ -1,0 +1,15 @@
+package transactions;
+
+public class Request {
+
+	String requestId;
+	String placeName;
+	String productId;
+
+	public Request(String requestId, String placeName, String productId) {
+		this.requestId=requestId;
+		this.placeName=placeName;
+		this.productId=productId;
+	}
+
+}

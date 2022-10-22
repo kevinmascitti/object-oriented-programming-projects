@@ -1,0 +1,19 @@
+package transactions;
+
+public class Transaction {
+
+	String transactionId;
+	String carrierName;
+	String requestId;
+	String offerId;
+	int score;
+
+	public Transaction(String transactionId, String carrierName, String requestId, String offerId) {
+		this.transactionId=transactionId;
+		this.carrierName=carrierName;
+		this.requestId=requestId;
+		this.offerId=offerId;
+		this.score=0;
+	}
+
+}

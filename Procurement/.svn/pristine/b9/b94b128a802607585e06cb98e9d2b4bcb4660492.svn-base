@@ -1,0 +1,34 @@
+package warehouse;
+
+public class Order {
+
+	private String code;
+	private Product prod;
+	private int quantity;
+	private Supplier supp;
+
+	public Order(String code, Product prod, int quantity, Supplier supp) {
+		this.code=code;
+		this.prod=prod;
+		this.quantity=quantity;
+		this.supp=supp;
+	}
+
+	public String getCode(){
+		return code;
+	}
+	
+	public boolean delivered(){
+		// TODO: Completare!
+		return false;
+	}
+
+	public void setDelivered() throws MultipleDelivery {
+		// TODO: Completare!
+	}
+	
+	public String toString(){
+		return "Order "+code+" for "+quantity+" of "+
+				prod.getCode()+" : "+prod.getDescription()+" from "+supp.getNome();
+	}
+}

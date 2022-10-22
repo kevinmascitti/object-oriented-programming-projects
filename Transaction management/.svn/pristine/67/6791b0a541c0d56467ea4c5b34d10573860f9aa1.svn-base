@@ -1,0 +1,110 @@
+package transactions;
+import java.util.*;
+import java.util.stream.Collectors;
+
+//import static java.util.stream.Collectors.*;
+//import static java.util.Comparator.*;
+
+public class TransactionManager {
+	
+	private Map<String, List<String>> regioni = new TreeMap<>();
+	private Map<String, List<String>> trasportatori = new TreeMap<>();
+	private Map<String, Request> richieste = new TreeMap<>();
+	private Map<String, Offer> offerte = new TreeMap<>();
+	
+//R1
+	public List<String> addRegion(String regionName, String... placeNames) { 
+		if(placeNames.length>0 && regionName!=null && !regioni.containsKey(regionName)) {
+			regioni.put(regionName, new LinkedList<>());
+			for(String s : placeNames) {
+				if(s!=null && !regioni.values().contains(s))
+					regioni.get(regionName).add(s);
+			}
+			return regioni.get(regionName).stream().sorted().collect(Collectors.toList());
+		}
+		return null;
+	}
+	
+	public List<String> addCarrier(String carrierName, String... regionNames) { 
+		if(regionNames.length>0 && carrierName!=null && !trasportatori.containsKey(carrierName)) {
+			trasportatori.put(carrierName, new LinkedList<>());
+			for(String s : regionNames) {
+				if(s!=null && !trasportatori.values().contains(s) && regioni.containsValue(s))
+					trasportatori.get(carrierName).add(s);
+			}
+			return trasportatori.get(carrierName).stream().sorted().collect(Collectors.toList());
+		}
+		return null;
+	}
+	
+	public List<String> getCarriersForRegion(String regionName) { 
+		return trasportatori.entrySet().stream()
+				.filter(t->t.getValue().equals(regionName))
+				.map(a->a.getKey())
+				.sorted()
+				.collect(Collectors.toList());
+	}
+	
+//R2
+	public void addRequest(String requestId, String placeName, String productId) 
+			throws TMException {
+		Boolean ok = false;
+		for(List<String> list : regioni.values()) {
+			if(list.contains(placeName)) {
+				ok=true;
+				break;
+			}
+		}
+		if(ok==true && !richieste.containsKey(requestId)) {
+			Request r = new Request(requestId, placeName, productId);
+			richieste.put(requestId, r);
+		}
+		else {
+			throw new TMException();
+		}
+	}
+	
+	public void addOffer(String offerId, String placeName, String productId) 
+			throws TMException {
+		Boolean ok = false;
+		for(List<String> list : regioni.values()) {
+			if(list.contains(placeName)) {
+				ok=true;
+				break;
+			}
+		}
+		if(ok==true && !offerte.containsKey(offerId)) {
+			Offer o = new Offer(offerId, placeName, productId);
+			offerte .put(offerId, o);
+		}
+		else {
+			throw new TMException();
+		}
+	}
+	
+
+//R3
+	public void addTransaction(String transactionId, String carrierName, String requestId, String offerId) 
+			throws TMException {
+	}
+	
+	public boolean evaluateTransaction(String transactionId, int score) {
+		return false;
+	}
+	
+//R4
+	public SortedMap<Long, List<String>> deliveryRegionsPerNT() {
+		return new TreeMap<Long, List<String>>();
+	}
+	
+	public SortedMap<String, Integer> scorePerCarrier(int minimumScore) {
+		return new TreeMap<String, Integer>();
+	}
+	
+	public SortedMap<String, Long> nTPerProduct() {
+		return new TreeMap<String, Long>();
+	}
+	
+	
+}
+

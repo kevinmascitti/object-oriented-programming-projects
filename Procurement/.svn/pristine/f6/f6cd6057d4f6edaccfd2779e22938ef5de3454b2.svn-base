@@ -1,0 +1,78 @@
+package warehouse;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Warehouse {
+	
+	private Map<String, Product> prodotti = new TreeMap<>();
+	private Map<String, Supplier> fornitori = new TreeMap<>();
+	private int code = 1;
+	private Map<String, Order> ordini = new TreeMap<>();
+
+	public Product newProduct(String code, String description){
+		Product p = new Product(code,description);
+		prodotti.put(code,p);
+		return p;
+	}
+	
+	public Collection<Product> products(){
+		if(prodotti.values().size()>0)
+			return prodotti.values();
+		return null;
+	}
+
+	public Product findProduct(String code){
+		if(prodotti.containsKey(code)) 
+			return prodotti.get(code);
+		return null;
+	}
+
+	public Supplier newSupplier(String code, String name){
+		Supplier s = new Supplier(code,name);
+		fornitori.put(code,s);
+		return s;
+	}
+	
+	public Supplier findSupplier(String code){
+		if(fornitori.containsKey(code)) 
+			return fornitori.get(code);
+		return null;
+	}
+
+	public Order issueOrder(Product prod, int quantity, Supplier supp)
+		throws InvalidSupplier {
+		if(prod.suppliers().contains(supp)) {
+			Order o = new Order("ORD"+code, prod, quantity, supp);
+			ordini.put("ORD"+code, o);
+			return o;
+		}
+		else
+			throw new InvalidSupplier();
+	}
+
+	public Order findOrder(String code){
+		if(ordini.containsKey(code))
+			return ordini.get(code);
+		return null;
+	}
+	
+	public List<Order> pendingOrders(){
+		// TODO: completare
+		return null;
+	}
+
+	public Map<String,List<Order>> ordersByProduct(){
+	    return null;
+	}
+	
+	public Map<String,Long> orderNBySupplier(){
+	    return null;
+	}
+	
+	public List<String> countDeliveredByProduct(){
+	    return null;
+	}
+}

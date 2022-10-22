@@ -1,0 +1,73 @@
+package it.polito.oop.books;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Book {
+
+    private Map<String, Topic> argomenti = new TreeMap<>();
+	private List<Question> domande = new LinkedList<>();
+
+	/**
+	 * Creates a new topic, if it does not exist yet, or returns a reference to the
+	 * corresponding topic.
+	 * 
+	 * @param keyword the unique keyword of the topic
+	 * @return the {@link Topic} associated to the keyword
+	 * @throws BookException
+	 */
+	public Topic getTopic(String keyword) throws BookException {
+	    if(keyword.length()>0 && keyword!=null) {
+	    	if(!argomenti .containsKey(keyword)) {
+	    		Topic t = new Topic(keyword);
+	    		argomenti.put(keyword, t);
+	    		return t;
+	    	}
+	    	else {
+	    		return argomenti.get(keyword);
+	    	}
+	    }
+	    else
+	    	throw new BookException();
+	}
+
+	public Question createQuestion(String question, Topic mainTopic) {
+        if(question.length()>0 && mainTopic!=null) {
+        	Question q = new Question(question, mainTopic);
+			domande.add(q);
+			return q;
+        }
+        return null;
+	}
+
+	public TheoryChapter createTheoryChapter(String title, int numPages, String text) {
+        return null;
+	}
+
+	public ExerciseChapter createExerciseChapter(String title, int numPages) {
+        return null;
+	}
+
+	public List<Topic> getAllTopics() {
+        return null;
+	}
+
+	public boolean checkTopics() {
+        return false;
+	}
+
+	public Assignment newAssignment(String ID, ExerciseChapter chapter) {
+        return null;
+	}
+	
+    /**
+     * builds a map having as key the number of answers and 
+     * as values the list of questions having that number of answers.
+     * @return
+     */
+    public Map<Long,List<Question>> questionOptions(){
+        return null;
+    }
+}

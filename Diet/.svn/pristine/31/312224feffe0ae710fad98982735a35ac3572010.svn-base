@@ -1,0 +1,172 @@
+package diet;
+
+import java.util.LinkedList;
+import java.sql.Timestamp;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+/**
+ * Represents the main class in the
+ * take-away system.
+ * 
+ * It allows adding restaurant, users, and creating orders.
+ *
+ */
+public class Takeaway {
+	
+//	Comparator cmpR = new Comparator() {
+//		@Override
+//		public int compare(Object a, Object b) {
+//			String first = ((Restaurant)a).getName();
+//			String second = ((Restaurant)b).getName();
+//			return first.compareTo(second);
+//		}
+//	};
+//	Comparator<User> cmpU = new Comparator<User>() {
+//		@Override
+//		public int compare(User a, User b) {
+//			int i;
+//			String first = a.getLastName();
+//			String second = b.getLastName();
+//			i = first.compareTo(second);
+//			if(i != 0)
+//				return i;
+//			else {
+//				first = a.getFirstName();
+//				second = b.getFirstName();
+//				return first.compareTo(second);
+//			}
+//		}
+//	};
+	
+	private SortedMap<String,Restaurant> restaurants = new TreeMap<>();
+	private SortedMap<String,User> users = new TreeMap<String, User>();
+
+	/**
+	 * Adds a new restaurant to the take-away system
+	 * 
+	 * @param r the restaurant to be added
+	 */
+	public void addRestaurant(Restaurant r) {
+		restaurants.putIfAbsent(r.getName(), r);
+	}
+	
+	/**
+	 * Returns the collections of restaurants
+	 * 
+	 * @return collection of added restaurants
+	 */
+	public Collection<String> restaurants() {
+		return restaurants.keySet();
+	}
+	
+	/**
+	 * Define a new user
+	 * 
+	 * @param firstName first name of the user
+	 * @param lastName  last name of the user
+	 * @param email     email
+	 * @param phoneNumber telephone number
+	 * @return
+	 */
+	public User registerUser(String firstName, String lastName, String email, String phoneNumber) {
+		User u = new User(firstName, lastName, email, phoneNumber);
+		users.put(lastName+firstName, u);
+		return u;
+	}
+	
+	/**
+	 * Gets the collection of registered users
+	 * 
+	 * @return the collection of users
+	 */
+	public Collection<User> users(){
+		return users.values();
+	}
+	
+	/**
+	 * Create a new order by a user to a given restaurant.
+	 * 
+	 * The order is initially empty and is characterized
+	 * by a desired delivery time. 
+	 * 
+	 * @param user				user object
+	 * @param restaurantName	restaurant name
+	 * @param h					delivery time hour
+	 * @param m					delivery time minutes
+	 * @return
+	 */
+	public Order createOrder(User user, String restaurantName, int h, int m) {
+		Restaurant restaurant = restaurants.get(restaurantName);
+		String s = h+":"+m;
+		String time = countTime(s);
+		LocalTime t = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+		String[] hours = restaurant.getHours();
+		
+		int elem = 0; 
+		for(String a : hours) {if(a!=null) elem++;}
+		int found = 0;
+		for(int i = 0; i<elem-1 && found==0; i=i+2) {
+			LocalTime t1 = LocalTime.parse(hours[i], DateTimeFormatter.ofPattern("HH:mm"));
+			LocalTime t2 = LocalTime.parse(hours[i+1], DateTimeFormatter.ofPattern("HH:mm"));
+			if((t.isAfter(t1) || t.equals(t1)) && (t.isBefore(t2) || t.equals(t2))) {
+				found = 1;
+				break;
+			}
+			else if(t.isAfter(t1) && t.isAfter(t2) && hours[i+2]!=null && t.isBefore(LocalTime.parse(hours[i+2], DateTimeFormatter.ofPattern("HH:mm"))) ) {
+				t = LocalTime.parse(hours[i+2], DateTimeFormatter.ofPattern("HH:mm"));
+				found = 1;
+				break;
+			}
+		}
+		if(found == 0)
+			t = LocalTime.parse(hours[0], DateTimeFormatter.ofPattern("HH:mm"));
+		Order o = new Order(user, restaurant, t);
+		user.orders.add(o);
+		restaurant.orders.add(o);
+		
+		return o;
+	}
+	
+	/**
+	 * Retrieves the collection of restaurant that are open
+	 * at the given time.
+	 * 
+	 * @param time time to check open
+	 * 
+	 * @return collection of restaurants
+	 */
+	public Collection<Restaurant> openedRestaurants(String time){
+		LocalTime t = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+		String[] hh;
+		Collection<Restaurant> rests = restaurants.values();
+		Collection<Restaurant> res = new LinkedList<>();
+		for(Restaurant r : rests) {
+			hh = r.getHours();
+			int elem = 0;
+			for(String a : hh) {if(a!=null) elem++;}
+			for(int i = 0; i<elem-1; i=i+2) {
+				LocalTime t1 = LocalTime.parse(hh[i], DateTimeFormatter.ofPattern("HH:mm"));
+				LocalTime t2 = LocalTime.parse(hh[i+1], DateTimeFormatter.ofPattern("HH:mm"));
+				if((t.isAfter(t1) || t.equals(t1)) && (t.isBefore(t2) || t.equals(t2))) {
+					res.add(r);
+				}
+			}
+		}
+		return res;
+	}
+	
+	public String countTime(String s) {
+		String[] num = s.split(":");
+		if(num[0].length()==1)
+			num[0]="0"+num[0];
+		if(num[1].length()==1)
+			num[1]="0"+num[1];
+		return num[0]+":"+num[1];
+	}
+
+}

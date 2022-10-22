@@ -1,0 +1,42 @@
+package delivery;
+
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Order {
+	
+	private int code;
+	private Customer customerId;
+	Map<Menu, Integer> menu = new LinkedHashMap<>();
+	Delivery.OrderStatus state;
+
+	public Order(int code, Customer customerId) {
+		this.code=code;
+		this.customerId=customerId;
+		this.state=Delivery.OrderStatus.NEW;
+	}
+	
+	public int getCode() {
+		return code;
+	}
+
+	public Customer getCustomerId() {
+		return customerId;
+	}
+	
+	public double getTotOrder() {
+		double totOrder = 0;
+		for (Map.Entry<Menu, Integer> entry : menu.entrySet()) {
+        	Menu k = entry.getKey();
+        	Integer v = entry.getValue();
+        	if(k!=null && v!=null)
+        		totOrder+= k.getPrice() * v;
+        }
+		return totOrder;
+	}
+
+}

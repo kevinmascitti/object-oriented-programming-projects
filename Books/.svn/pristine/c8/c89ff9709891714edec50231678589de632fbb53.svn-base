@@ -1,0 +1,46 @@
+package it.polito.oop.books;
+
+import java.util.List;
+
+
+public class Assignment {
+
+    String id;
+	ExerciseChapter chapter;
+	double score = 0;
+
+	public Assignment(String id, ExerciseChapter chapter) {
+		this.id=id;
+		this.chapter=chapter;
+	}
+
+	public String getId() {
+        return id;
+    }
+
+    public ExerciseChapter getChapter() {
+        return chapter;
+    }
+
+    public double addResponse(Question q, List<String> answers) {
+        if(q!=null && answers.size()>0) {
+        	long FP=0, FN=0;
+        	long N = q.numAnswers();
+        	for(String s : answers) {
+        		if(q.getCorrectAnswers().contains(s)) {
+        			FN++;
+        		} else {
+        			FP++;
+        		}
+        	}
+        	score+=(N-FP-FN)/N;
+        	return (N-FP-FN)/N;
+        }
+        return -1;
+    }
+    
+    public double totalScore() {
+        return score;
+    }
+
+}

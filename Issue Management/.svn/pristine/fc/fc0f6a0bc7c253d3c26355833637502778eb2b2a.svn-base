@@ -1,0 +1,37 @@
+package ticketing;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import ticketing.IssueManager.UserClass;
+
+public class User {
+
+	private String username;
+	private UserClass userClass1;
+	private UserClass userClass2;
+
+	public User(String username, UserClass userClass) {
+		this.username=username;
+		this.userClass1=userClass;
+		this.userClass2=null;
+	}
+	
+	public User(String username, UserClass userClass, UserClass userClass2) {
+		this.username=username;
+		this.userClass1=userClass;
+		this.userClass2=userClass2;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public Set<UserClass> getClassi() {
+		Set<UserClass> classi = new HashSet<>();
+		classi.add(userClass1);
+		classi.add(userClass2);
+		return classi;
+	}
+	
+}

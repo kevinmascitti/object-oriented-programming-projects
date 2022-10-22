@@ -1,0 +1,38 @@
+package orari;
+
+public class Treno {
+
+  public Percorso getPercorso() {
+    return null;
+  }
+
+  public int getGiorno() {
+    return -1;
+  }
+
+  public int getMese() {
+    return -1;
+  }
+
+  public int getAnno() {
+    return -1;
+  }
+
+  public Passaggio registraPassaggio(String codice, int ore, int minuti) 
+  	throws StazioneNonValida {
+    return null;
+  }
+
+  public boolean arrivato() {
+    return false;
+  }
+
+  public int ritardoMassimo() {
+    return -1;
+  }
+
+  public int ritardoFinale() {
+    return -1;
+  }
+
+}

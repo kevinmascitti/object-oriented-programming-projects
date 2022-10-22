@@ -1,0 +1,27 @@
+package groups;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class Supplier {
+	
+	private String name;
+	private Map<String, Product> prodotti = new TreeMap<>();
+
+	public Supplier(String name) {
+		this.name=name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public Collection< Product> getProdotti() {
+		return prodotti.values();
+	}
+
+	public void addProduct(Product p) {
+		prodotti.put(p.getType(), p);
+	}
+}

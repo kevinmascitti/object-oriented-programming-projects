@@ -1,0 +1,49 @@
+package managingProperties;
+
+public class Request {
+
+	private String id;
+	private String app;
+	private int codice;
+	private Stato stato;
+	private String professione;
+
+	public enum Stato { pending, assigned, completed };
+	
+	public Request(String owner, String apartment, String professione, int codiceR) {
+		this.id=owner;
+		this.app=apartment;
+		this.professione=professione;
+		this.codice=codiceR;
+		this.stato=Stato.pending;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getApp() {
+		return app;
+	}
+
+	public int getCodice() {
+		return codice;
+	}
+
+	public Stato getStato() {
+		return stato;
+	}
+
+	public void setCompletato() {
+		this.stato = Stato.completed;
+	}
+
+	public String getProfessione() {
+		return professione;
+	}
+
+	public void setAssigned() {
+		this.stato=Stato.assigned;
+	}
+
+}

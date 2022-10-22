@@ -1,0 +1,111 @@
+package hydraulic;
+
+/**
+ * Represents a multisplit element, an extension of the Split that allows many outputs
+ * 
+ * During the simulation each downstream element will
+ * receive a stream that is determined by the proportions.
+ */
+
+public class Multisplit extends Split {
+
+	/**
+	 * Constructor
+	 * @param name
+	 * @param numOutput
+	 */
+	private double[] proportions;
+	
+	
+	public Multisplit(String name, int numOutput) {
+		super(name, numOutput);
+		this.numOutput = numOutput;
+	}
+	
+	/**
+	 * returns the downstream elements
+	 * @return array containing the downstream elements
+	 */
+	
+    public Element[] getOutputs(){
+    	return this.outputs;
+    }
+
+    /**
+     * connect one of the outputs of this split to a
+     * downstream component.
+     * 
+     * @param elem  the element to be connected downstream
+     * @param noutput the output number to be used to connect the element
+     */
+    
+	public void connect(Element elem, int noutput){
+		if(noutput>=0 && noutput<numOutput) {
+			this.outputs[noutput] = elem;
+		}
+		else {
+			System.err.println("Errore: lo split ha solo 2 uscite!");
+			return;
+		}
+	}
+	
+	/**
+	 * Define the proportion of the output flows w.r.t. the input flow.
+	 * 
+	 * The sum of the proportions should be 1.0 and 
+	 * the number of proportions should be equals to the number of outputs.
+	 * Otherwise a check would detect an error.
+	 * 
+	 * @param proportions the proportions of flow for each output
+	 */
+	
+	public void setProportions(double... proportions) {
+		if(proportions.length != this.numOutput) {
+			System.err.println("Errore: il numero di proporzioni non è corretto. Gli output sono: "+this.numOutput);
+			return;
+		}
+		this.proportions = proportions;
+		double sum = 0;
+		for(int i=0; i<this.numOutput; i++) {
+			if(proportions[i]>=1.0) {
+				System.err.println("Errore: il flusso uscente da split deve essere complessivamente pari a 1.0.");
+				return;
+			}
+			sum += proportions[i];
+		}
+		if(sum != 1.0) {
+			System.err.println("Errore: il flusso uscente da split deve essere complessivamente pari a 1.0.");
+			return;
+		}
+	}
+	
+	@Override
+	protected StringBuffer layout(String pad) {
+		StringBuffer res = new StringBuffer();
+		res.append("[").append(getName()).append("]Split");
+		String padding = pad + blanks(res.length());
+		res.append(" +-> ").append( getOutputs()[0].layout( padding + "     ") );
+		for(int i=1; i<this.numOutput; i++) {
+			res.append("\n").append( padding ).append(" |\n");
+			res.append( padding );
+			res.append(" +-> ").append( getOutputs()[i].layout( padding + "     ") );
+		}
+		return res;
+	}
+	
+	@Override
+	protected void simulate(double inFlow, SimulationObserverExt observer, boolean enableMaxFlowChecks) {
+		double[] outFlow = new double[numOutput];
+		for(int i=0; i<outFlow.length; ++i) {
+			outFlow[i] = inFlow * proportions[i];
+		}
+		observer.notifyFlow("MultiSplit", getName(), inFlow, outFlow);
+		if(enableMaxFlowChecks && inFlow>maxFlow)
+			observer.notifyFlowError(this.getClass().getName(), getName(), inFlow, maxFlow);
+		for(int i=0; i<outFlow.length; ++i) {
+		    Element e = getOutputs()[i];
+			e.simulate(outFlow[i],observer,enableMaxFlowChecks);
+		}
+	}
+	
+}

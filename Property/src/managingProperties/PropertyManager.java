@@ -1,0 +1,214 @@
+package managingProperties;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+public class PropertyManager {
+	
+	private Map<String,Building> edifici = new TreeMap<>();
+	private Map<String, Owner> proprietari = new TreeMap<>();
+	private Map<String, List<Professional>> professioni = new TreeMap<>();
+	private Map<String, Professional> professionisti = new TreeMap<>();
+	private int codiceR = 1;
+	private Map<Integer, Request> richieste = new TreeMap<>();
+
+	/**
+	 * Add a new building 
+	 */
+	public void addBuilding(String building, int n) throws PropertyException {
+		Building b = new Building(building, n);
+		if(edifici.containsKey(building) || n<1 || n>100)
+			throw new PropertyException();
+		else
+			edifici.put(building, b);
+	}
+
+	public void addOwner(String owner, String... apartments) throws PropertyException {
+		if(apartments.length!=0) {
+			Owner o = new Owner(owner, apartments);
+			if(proprietari.containsKey(owner)) {
+				throw new PropertyException();
+			} else {
+				String[] ap = apartments;
+				for(String s : ap) {
+					String[] a = s.split(":");
+					int n;
+					if(a[0].length()==0 || a[1].length()==0)
+						throw new PropertyException();
+					else {
+						try {
+							n = Integer.parseInt(a[1]);
+						}
+						catch(NumberFormatException e) {
+							return;
+						}
+						if( !edifici.containsKey(a[0]) || n>=edifici.get(a[0]).getTotapp() || !edifici.get(a[0]).isFree(n) ) {
+							throw new PropertyException();
+						} 
+						else {
+							proprietari.put(owner, o);
+							edifici.get(a[0]).setOwner(o, n);
+						}
+					}
+				}
+			}
+		} else {
+			throw new PropertyException();
+		}
+		
+	}
+
+	/**
+	 * Returns a map ( number of apartments => list of buildings ) 
+	 * 
+	 */
+	public SortedMap<Integer, List<String>> getBuildings() {
+		return edifici.values().stream()
+				.sorted(Comparator.comparing(Building::getNome))
+				.collect(Collectors.groupingBy(
+						Building::getTotapp,
+						TreeMap::new,
+						Collectors.mapping(Building::getNome,
+								Collectors.toList())
+						));
+	}
+
+	public void addProfessionals(String profession, String... professionals) throws PropertyException {
+		if(professionals.length!=0) {
+			List<Professional> ps = new LinkedList<>();
+			for(String id : professionals) {
+				Professional p = new Professional(profession, id);
+				ps.add(p);
+				if(!professionisti.containsKey(id) && !professioni.containsKey(profession)) {
+					professionisti.put(id, p);
+				}
+				else {
+					throw new PropertyException();
+				}
+			}
+			professioni.put(profession, ps);
+		}
+		else {
+			throw new PropertyException();
+		}
+	}
+
+	/**
+	 * Returns a map ( profession => number of workers )
+	 *
+	 */
+	public SortedMap<String, Integer> getProfessions() {
+		List<String> profess = professioni.keySet()
+				.stream()
+				.sorted()
+				.collect(Collectors.toList());
+		SortedMap<String,Integer> mappa = new TreeMap<>();
+		for(String s : profess) {
+			mappa.put(s, professioni.get(s).size());
+		}
+		return mappa;
+	}
+
+	public int addRequest(String owner, String apartment, String profession) throws PropertyException {
+		String[] ap = apartment.split(":");
+		if(!proprietari.containsKey(owner) || !edifici.containsKey(ap[0]) 
+				|| !professioni.containsKey(profession)
+				|| !proprietari.get(owner).possiede(apartment)) {
+			throw new PropertyException();
+		}
+		else {
+			Request R = new Request(owner, apartment, profession, codiceR);
+			richieste.put(codiceR, R);
+			codiceR++;
+			return codiceR-1;
+		}
+	}
+
+	public void assign(int requestN, String professional) throws PropertyException {
+		if(richieste.containsKey(requestN) && 
+				richieste.get(requestN).getStato()==Request.Stato.pending &&
+				professionisti.containsKey(professional) &&
+				richieste.get(requestN).getProfessione().equals(professionisti.get(professional).getProfessione())) {
+			richieste.get(requestN).setAssigned(professional);
+			professionisti.get(professional).assign(richieste.get(requestN));
+		}
+		else {
+			throw new PropertyException();
+		}
+		
+	}
+
+	public List<Integer> getAssignedRequests() {
+		return richieste.values().stream()
+				.filter( a->((Request)a).getStato()==Request.Stato.assigned )
+				.sorted(Comparator.comparing(Request::getId))
+				.map(a->a.getCodice()).collect(Collectors.toList());
+	}
+
+	
+	public void charge(int requestN, int amount) throws PropertyException {
+		if(richieste.containsKey(requestN) && richieste.get(requestN).getStato()==Request.Stato.assigned
+				&& amount>0 && amount<1000) {
+			richieste.get(requestN).setCompletato(amount);
+		}
+		else {
+			throw new PropertyException();
+		}
+		
+	}
+
+	/**
+	 * Returns the list of request ids
+	 * 
+	 */
+	public List<Integer> getCompletedRequests() {
+		return richieste.values().stream()
+		.filter(a->a.getStato()==Request.Stato.completed)
+		.map(a->a.getCodice())
+		.sorted()
+		.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Returns a map ( owner => total expenses )
+	 * 
+	 */
+	public SortedMap<String, Integer> getCharges() {
+		return richieste.values().stream()
+				.filter(b->b.getStato()==Request.Stato.completed)
+				.filter(a->a.getSpesa()!=0)
+				.sorted(Comparator.comparing(a->proprietari.get(((Request)a).getId()).getNome()))
+				.collect(Collectors.groupingBy(
+						Request::getId,
+						TreeMap::new,
+						Collectors.summingInt(Request::getSpesa)
+						));
+	}
+
+	/**
+	 * Returns the map ( building => ( profession => total expenses) ).
+	 * Both buildings and professions are sorted alphabetically
+	 * 
+	 */
+	public SortedMap<String, Map<String, Integer>> getChargesOfBuildings() {
+		return richieste.values().stream()
+				.filter(a->a.getStato()==Request.Stato.completed)
+				.filter(a->a.getSpesa()>0)
+				.sorted(Comparator.comparing(Request::getBuilding))
+				.collect(Collectors.groupingBy(
+						Request::getBuilding,
+						TreeMap::new,
+						Collectors.groupingBy(
+								Request::getMaint,
+								TreeMap::new, 
+								Collectors.summingInt(Request::getSpesa))
+						));
+	}
+
+}

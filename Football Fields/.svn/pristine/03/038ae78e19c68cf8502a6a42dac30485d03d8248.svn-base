@@ -1,0 +1,17 @@
+package it.polito.oop.futsal;
+
+public class Associate {
+
+	int code;
+	String first;
+	String last;
+	String mobile;
+
+	public Associate(Integer code, String first, String last, String mobile) {
+		this.code=code;
+		this.first=first;
+		this.last=last;
+		this.mobile=mobile;
+	}
+
+}

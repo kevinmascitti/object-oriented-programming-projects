@@ -1,0 +1,324 @@
+package ticketing;
+
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import ticketing.Ticket.State;
+
+public class IssueManager {
+
+	private Map<String,User> utenti = new TreeMap<>();
+	private Map<String,Componente> componenti = new TreeMap<>();
+	private int codice = 1;
+	
+	private Map<Integer,Ticket> tickets = new TreeMap<>();
+	
+    /**
+     * Eumeration of valid user classes
+     */
+    public static enum UserClass {
+        /** user able to report an issue and create a corresponding ticket **/
+        Reporter, 
+        /** user that can be assigned to handle a ticket **/
+        Maintainer }
+    
+    /**
+     * Creates a new user
+     * 
+     * @param username name of the user
+     * @param classes user classes
+     * @throws TicketException if the username has already been created or if no user class has been specified
+     */
+    public void createUser(String username, UserClass... classes) throws TicketException {
+    	User u = null;
+    	if(classes.length==0) {
+    		throw new TicketException();
+    	}
+    	else {
+	        if(classes.length==1) {
+	        	u = new User(username, classes[0]);
+	        } else if(classes.length==2) {
+	        	u = new User(username, classes[0], classes[1]);
+	        }
+	        if(!utenti.containsKey(username))
+	        	utenti.put(username,u);
+	        else
+	        	throw new TicketException();
+    	}
+    }
+
+    /**
+     * Creates a new user
+     * 
+     * @param username name of the user
+     * @param classes user classes
+     * @throws TicketException if the username has already been created or if no user class has been specified
+     */
+    public void createUser(String username, Set<UserClass> classes) throws TicketException {
+    	if(!classes.isEmpty()) {
+	    	UserClass[] classi = new UserClass[2];
+	    	classes.toArray(classi);
+	        if(classi.length==1) {
+	        	User u = new User(username, classi[0]);
+		        if(!utenti.containsKey(username))
+		        	utenti.put(username,u);
+		        else
+		        	throw new TicketException();
+	        } else if(classi.length==2) {
+	        	User u = new User(username, classi[0], classi[1]);
+	        	if(!utenti.containsKey(username))
+		        	utenti.put(username,u);
+		        else
+		        	throw new TicketException();
+	        }
+    	} else throw new TicketException();
+    }
+   
+    /**
+     * Retrieves the user classes for a given user
+     * 
+     * @param username name of the user
+     * @return the set of user classes the user belongs to
+     */
+    public Set<UserClass> getUserClasses(String username){
+        Optional<User> u = utenti.values().stream()
+        		.filter(a->a.getUsername()==username)
+        		.findFirst();
+        if(u.isPresent()) {
+        	return u.get().getClassi();
+        }
+        return null;
+    }
+    
+    /**
+     * Creates a new component
+     * 
+     * @param name unique name of the new component
+     * @throws TicketException if a component with the same name already exists
+     */
+    public void defineComponent(String name) throws TicketException {
+    	Componente c = new Componente(name);
+        if(!componenti.containsKey(name)) {
+        	componenti.put(name, c);
+        }
+        else {
+        	throw new TicketException();
+        }
+    }
+    
+    /**
+     * Creates a new sub-component as a child of an existing parent component
+     * 
+     * @param name unique name of the new component
+     * @param parentPath path of the parent component
+     * @throws TicketException if the the parent component does not exist or 
+     *                          if a sub-component of the same parent exists with the same name
+     */
+    public void defineSubComponent(String name, String parentPath) throws TicketException {
+    	if(!parentPath.isEmpty()) {
+	    	Componente c = new Componente(name);
+	    	String[] cammini = parentPath.split("/");
+	        if(!esistePath(parentPath) 
+	        		|| (!componenti.get(cammini[cammini.length-1]).getSuccs().isEmpty() 
+	        		&& componenti.get(cammini[cammini.length-1]).getSuccs().keySet().contains(name)) ) {
+	        	throw new TicketException();
+	        }
+	        else {
+	        	for(int i=1; i<cammini.length; i++) {
+	        		componenti.put(name, c);
+	        		c.addPrec(componenti.get(cammini[i]));
+	        		componenti.get(cammini[i]).addSucc(c);
+	        	}
+	        }
+    	} else {
+    		throw new TicketException();
+    	}
+    }
+    
+    /**
+     * Retrieves the sub-components of an existing component
+     * 
+     * @param path the path of the parent
+     * @return set of children sub-components
+     */
+    public Set<String> getSubComponents(String path){
+    	String[] cammini = path.split("/");
+    	Componente c = componenti.get(cammini[cammini.length-1]);
+        return c.getSuccs().keySet();
+    }
+
+    /**
+     * Retrieves the parent component
+     * 
+     * @param path the path of the parent
+     * @return name of the parent
+     */
+    public String getParentComponent(String path){
+    	String[] cammini = path.split("/");
+    	Componente c = componenti.get(cammini[cammini.length-1]);
+    	if(!c.getPrecs().isEmpty()) {
+    		String s = c.getPrecs().keySet().stream().collect(Collectors.joining("/"));
+    		return "/"+s;
+    	}
+    	else
+    		return null;
+    }
+
+    /**
+     * Opens a new ticket to report an issue/malfunction
+     * 
+     * @param username name of the reporting user
+     * @param componentPath path of the component or sub-component
+     * @param description description of the malfunction
+     * @param severity severity level
+     * 
+     * @return unique id of the new ticket
+     * 
+     * @throws TicketException if the user name is not valid, the path does not correspond to a defined component, 
+     *                          or the user does not belong to the Reporter {@link IssueManager.UserClass}.
+     */
+    public int openTicket(String username, String componentPath, String description, Ticket.Severity severity) throws TicketException {
+        if(utenti.containsKey(username) && esistePath(componentPath) && utenti.get(username).getClassi().contains(UserClass.Reporter))
+    	{
+        	User u = utenti.get(username);
+        	Ticket t = new Ticket(codice, u, componentPath, description, severity);
+	        tickets.put(codice,t);
+	        codice++;
+	        return codice-1;
+    	}
+        else {
+        	throw new TicketException();
+        }
+    }
+    
+    private boolean esistePath(String componentPath) {
+    	String[] cammini = componentPath.split("/");
+		int i = 1;
+		if(componenti.containsKey(cammini[i])) {
+			componenti.get(cammini[i]);
+			return ricorsione(componenti, cammini, i+1);
+		}
+		return false;
+	}
+
+	private boolean ricorsione(Map<String, Componente> componenti, String[] cammini, int i) {
+		if(i>=cammini.length)
+			return true;
+		if(componenti.containsKey(cammini[i])) {
+			componenti.get(cammini[i]);
+			return ricorsione(componenti, cammini, i+1);
+		}
+		return false;
+	}
+
+	/**
+     * Returns a ticket object given its id
+     * 
+     * @param ticketId id of the tickets
+     * @return the corresponding ticket object
+     */
+    public Ticket getTicket(int ticketId){
+        if(tickets.containsKey(ticketId))
+        	return tickets.get(ticketId);
+        return null;
+    }
+    
+    /**
+     * Returns all the existing tickets sorted by severity
+     * 
+     * @return list of ticket objects
+     */
+    public List<Ticket> getAllTickets(){
+        return tickets.values().stream().sorted(Comparator.comparing(Ticket::getSeverity)).collect(Collectors.toList());
+    }
+    
+    /**
+     * Assign a maintainer to an open ticket
+     * 
+     * @param ticketId  id of the ticket
+     * @param username  name of the maintainer
+     * @throws TicketException if the ticket is in state <i>Closed</i>, the ticket id or the username
+     *                          are not valid, or the user does not belong to the <i>Maintainer</i> user class
+     */
+    public void assingTicket(int ticketId, String username) throws TicketException {
+        if(!tickets.containsKey(ticketId) 
+        		|| !utenti.containsKey(username) 
+        		|| !utenti.get(username).getClassi().contains(UserClass.Maintainer)
+        		|| tickets.get(ticketId).getState().equals(State.Closed))
+        	throw new TicketException();
+        else{
+        	User maint = utenti.get(username);
+        	tickets.get(ticketId).setAssigned(maint);
+        	maint.setTicket(tickets.get(ticketId));
+        }
+    }
+
+    /**
+     * Closes a ticket
+     * 
+     * @param ticketId id of the ticket
+     * @param description description of how the issue was handled and solved
+     * @throws TicketException if the ticket is not in state <i>Assigned</i>
+     */
+    public void closeTicket(int ticketId, String description) throws TicketException {
+        if(!tickets.get(ticketId).getState().equals(State.Assigned)) {
+        	throw new TicketException();
+        }
+        else {
+        	tickets.get(ticketId).setClosed(description);
+        }
+    }
+
+    /**
+     * returns a sorted map (keys sorted in natural order) with the number of  
+     * tickets per Severity, considering only the tickets with the specific state.
+     *  
+     * @param state state of the tickets to be counted, all tickets are counted if <i>null</i>
+     * @return a map with the severity and the corresponding count 
+     */
+    public SortedMap<Ticket.Severity,Long> countBySeverityOfState(Ticket.State state){
+        return state==null? tickets.values().stream()
+        		.collect(Collectors.groupingBy
+        				(Ticket::getSeverity,
+        				TreeMap::new,
+        				Collectors.counting()
+        				)) : tickets.values().stream()
+        		.filter(a->a.getState().equals(state))
+        		.collect(Collectors.groupingBy
+        				(Ticket::getSeverity,
+        				TreeMap::new,
+        				Collectors.counting()
+        				));
+    }
+
+    /**
+     * Find the top maintainers in terms of closed tickets.
+     * 
+     * The elements are strings formatted as <code>"username:###"</code> where <code>username</code> 
+     * is the user name and <code>###</code> is the number of closed tickets. 
+     * The list is sorter by descending number of closed tickets and then by username.
+
+     * @return A list of strings with the top maintainers.
+     */
+    public List<String> topMaintainers(){
+        List<User> maintainers = new LinkedList<>();
+        for(User u : utenti.values()) {
+        	if(u.getClassi().contains(UserClass.Maintainer))
+        		maintainers.add(u);
+        }
+        return maintainers.stream()
+        		.sorted(Comparator.comparing(User::getClosed).reversed()
+        				.thenComparing(User::getUsername))
+        		.map(User::toStringR)
+        		.collect(Collectors.toList());
+    }
+
+}
